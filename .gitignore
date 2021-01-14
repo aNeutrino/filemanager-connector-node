@@ -1,0 +1,16 @@
+
+### Code ###
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+*.code-workspace
+
+### JetBrains ###
+
+# User-specific stuff
+.idea/*
+.idea/
+
+
+# Dependency directories
+node_modules/

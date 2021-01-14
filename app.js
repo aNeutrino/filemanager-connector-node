@@ -1,8 +1,7 @@
 const express = require('express');
 const app = express();
 const fs = require('fs');
-var multer = require('multer')
-
+const multer = require('multer');
 app.use(express.json());
 
 const apiResponse = (res, status = 200) =>
@@ -23,12 +22,12 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,path');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   next();
 });
 
 app.get('/filemanager/list', (req, res) => {
-  const path = req.query.path || '.';
+  const path = req.query.path || '/mnt/lizardfs';
 
   fs.readdir(path, (err, files) => {
     if (err) {
@@ -41,13 +40,16 @@ app.get('/filemanager/list', (req, res) => {
       let size = 0;
       let createdAt = null;
       let updatedAt = null;
+      let goal = 'empty goal';
       try {
         const stat = fs.statSync(fpath);
         type = stat.isDirectory() ? 'dir' : type;
         size = stat.size || size;
         createdAt = stat.birthtimeMs;
         updatedAt = stat.mtimeMs;
+        goal = require('child_process').execSync('lizardfs getgoal "' + fpath + '" | cut -d" " -f 2').toString().replace(/(\r\n|\n|\r)/gm, "");
       } catch (e) {
+        console.log('error', e);
         return null;
       }
       return {
@@ -57,6 +59,7 @@ app.get('/filemanager/list', (req, res) => {
         size,
         createdAt,
         updatedAt,
+        goal,
       };
     }).filter(Boolean);
 
