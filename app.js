@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const fs = require('fs');
+const execSync = require('child_process').execSync;
 app.use(express.json());
 
 const apiResponse = (res, status = 200) =>
@@ -46,7 +47,7 @@ app.get('/filemanager/list', (req, res) => {
         size = stat.size || size;
         createdAt = stat.birthtimeMs;
         updatedAt = stat.mtimeMs;
-        goal = require('child_process').execSync('lizardfs getgoal "' + fpath + '" | cut -d" " -f 2').toString().replace(/(\r\n|\n|\r)/gm, "");
+        goal = execSync('lizardfs getgoal "' + fpath + '" | cut -d" " -f 2').toString().replace(/(\r\n|\n|\r)/gm, "");
       } catch (e) {
         console.log('error', e);
         return null;
@@ -64,6 +65,11 @@ app.get('/filemanager/list', (req, res) => {
 
     return apiResponse(res)(items);
   });
+});
+
+app.get('/filemanager/getLFSGoals', (req, res) => {
+    const goals = execSync("lizardfs-admin list-goals mfsmaster 9421 --porcelain | cut -d' ' -f2 | egrep '^[0-9]+$' -v ").toString();
+    return apiResponse(res)(goals.split('\n'));
 });
 
 app.get('/filemanager/file/content', (req, res) =>
