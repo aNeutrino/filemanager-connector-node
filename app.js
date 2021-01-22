@@ -72,6 +72,16 @@ app.get('/filemanager/getLFSGoals', (req, res) => {
     return apiResponse(res)(goals.split('\n'));
 });
 
+
+app.post('/filemanager/setLFSGoal', (req, res) => {
+  const goalName = req.body.goalName;
+  const isRecursive = req.body.isRecursive;
+  const path = req.body.path;
+
+  const goals =  execSync("lizardfs setgoal" + ( isRecursive ? " -r " : " ") + goalName + " " + `/${path}/`);
+ return apiResponse(res)(true);
+});
+
 app.get('/filemanager/file/content', (req, res) =>
   res.download(req.query.path));
 
