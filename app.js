@@ -3,6 +3,7 @@ const app = express();
 const fs = require('fs');
 const execSync = require('child_process').execSync;
 app.use(express.json());
+require('dotenv').config()
 
 const apiResponse = (res, status = 200) =>
   (data, success = true, errorMsg = null, error = null) =>
@@ -27,7 +28,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/filemanager/list', (req, res) => {
-  const path = req.query.path || '/mnt/lizardfs';
+  const path = req.query.path || process.env.INITIAL_PATH;
 
   fs.readdir(path, (err, files) => {
     if (err) {
@@ -68,7 +69,7 @@ app.get('/filemanager/list', (req, res) => {
 });
 
 app.get('/filemanager/getLFSGoals', (req, res) => {
-    const goals = execSync("lizardfs-admin list-goals mfsmaster 9421 --porcelain | cut -d' ' -f2 | egrep '^[0-9]+$' -v ").toString();
+    const goals = execSync("lizardfs-admin list-goals fjfj.pl 9421 --porcelain | cut -d' ' -f2 | egrep '^[0-9]+$' -v ").toString();
     return apiResponse(res)(goals.split('\n'));
 });
 
@@ -77,8 +78,9 @@ app.post('/filemanager/setLFSGoal', (req, res) => {
   const goalName = req.body.goalName;
   const isRecursive = req.body.isRecursive;
   const path = req.body.path;
-
-  const goals =  execSync("lizardfs setgoal" + ( isRecursive ? " -r " : " ") + goalName + " " + `/${path}/`);
+  const comand = "lizardfs setgoal" + ( isRecursive ? " -r " : " ") + goalName + " " + `/${path}/`;
+  console.log(comand);
+  const goals =  execSync(comand);
  return apiResponse(res)(true);
 });
 
